@@ -18,9 +18,9 @@ const io = socketIo(server, {
   },
 });
 
-// Middleware setup
+
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow CORS for this origin
+  origin: 'http://localhost:3000', 
 }));
 
 app.use(express.json());
@@ -37,7 +37,7 @@ db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 
-// Define a Mongoose schema and model for code blocks
+// Define a Mongoose schema and model 
 const codeBlockSchema = new mongoose.Schema({
   title: String,
   code: String,
@@ -54,7 +54,7 @@ function normalizeCode(code) {
   return code.replace(/\s+/g, ' ').trim();
 }
 
-// Handle Socket.io connections
+// Handle Socket connections
 io.on('connection', (socket) => {
   console.log(`User ${socket.id} connected`);
 
@@ -70,7 +70,7 @@ io.on('connection', (socket) => {
     currentRoom = codeBlockId;
     socket.join(codeBlockId);
 
-    // Initialize roomUsers if not already done
+    
     if (!roomUsers[codeBlockId]) {
       roomUsers[codeBlockId] = { mentor: null, students: 0 };
     }
@@ -124,7 +124,7 @@ io.on('connection', (socket) => {
       }
     });
 
-    // Handle disconnection
+    
     // Handle disconnection
 socket.on('disconnect', async () => {
     console.log(`User ${socket.id} disconnected from room ${currentRoom}`);
@@ -183,7 +183,7 @@ app.get('/api/code-blocks', async (req, res) => {
   }
 });
 
-// Endpoint to get a single code block by ID
+
 app.get('/api/code-blocks/:blockId', async (req, res) => {
   try {
     const { blockId } = req.params;
@@ -198,7 +198,7 @@ app.get('/api/code-blocks/:blockId', async (req, res) => {
   }
 });
 
-// Define the port for the server
+
 const port = 3001;
 
 // Start the server
