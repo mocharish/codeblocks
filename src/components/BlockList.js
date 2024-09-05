@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 const BlockList = () => {
   const [codeBlocks, setCodeBlocks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,8 +15,10 @@ const BlockList = () => {
         }
         const data = await response.json();
         setCodeBlocks(data); // Assuming data is an array of code blocks
+        setLoading(false);
       } catch (error) {
         console.error('Error fetching code blocks:', error);
+        setLoading(false);
       }
     };
 
@@ -29,17 +32,23 @@ const BlockList = () => {
   return (
     <div style={styles.container}>
       <h1 style={styles.heading}>Choose Code Block</h1>
-      <div style={styles.buttonContainer}>
-        {codeBlocks.map((block) => (
-          <button
-            key={block._id} // Use _id from MongoDB
-            onClick={() => handleClick(block._id)}
-            style={styles.button}
-          >
-            {block.title}
-          </button>
-        ))}
-      </div>
+      {loading ? (
+        <div style={styles.spinner}></div>
+      ) : (
+        <div style={styles.gridContainer}>
+          {codeBlocks.map((block) => (
+            <div key={block._id} style={styles.card}>
+              <h2 style={styles.cardTitle}>{block.title}</h2>
+              <button
+                onClick={() => handleClick(block._id)}
+                style={styles.button}
+              >
+                Open Block
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -48,22 +57,38 @@ const styles = {
   container: {
     textAlign: 'center',
     marginTop: '50px',
-    backgroundColor: '#f0f0f0',
-    padding: '20px',
+    backgroundColor: '#f9f9f9',
+    padding: '40px',
     borderRadius: '8px',
+    maxWidth: '1200px',
+    margin: '0 auto',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   heading: {
     color: '#333',
-    fontSize: '24px',
-    marginBottom: '20px',
+    fontSize: '28px',
+    marginBottom: '40px',
+    fontFamily: 'Arial, sans-serif',
   },
-  buttonContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+  gridContainer: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+    gap: '20px',
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: '20px',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+  },
+  cardTitle: {
+    fontSize: '20px',
+    color: '#007bff',
+    marginBottom: '15px',
   },
   button: {
-    margin: '10px',
     padding: '10px 20px',
     fontSize: '16px',
     cursor: 'pointer',
@@ -72,6 +97,26 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
     transition: 'background-color 0.3s ease',
+  },
+  buttonHover: {
+    backgroundColor: '#0056b3',
+  },
+  spinner: {
+    width: '50px',
+    height: '50px',
+    border: '6px solid #f3f3f3',
+    borderTop: '6px solid #007bff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+    margin: '0 auto',
+  },
+  '@keyframes spin': {
+    '0%': {
+      transform: 'rotate(0deg)',
+    },
+    '100%': {
+      transform: 'rotate(360deg)',
+    },
   },
 };
 
