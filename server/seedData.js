@@ -11,7 +11,7 @@ const codeBlockSchema = new mongoose.Schema({
 const CodeBlock = mongoose.model('CodeBlock', codeBlockSchema);
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/codeBlocksDB', {
+mongoose.connect('mongodb+srv://mocharish:8448631@mocharish.qyom5.mongodb.net/codeBlocksDB?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })

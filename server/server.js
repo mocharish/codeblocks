@@ -18,7 +18,6 @@ const io = socketIo(server, {
   },
 });
 
-
 app.use(cors({
   origin: 'http://localhost:3000', 
 }));
@@ -26,11 +25,9 @@ app.use(cors({
 app.use(express.json());
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/codeBlocksDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect('mongodb+srv://mocharish:8448631@mocharish.qyom5.mongodb.net/codeBlocksDB?retryWrites=true&w=majority');
 
+// Updated code without useNewUrlParser and useUnifiedTopology options
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', () => {
@@ -70,7 +67,6 @@ io.on('connection', (socket) => {
     currentRoom = codeBlockId;
     socket.join(codeBlockId);
 
-    
     if (!roomUsers[codeBlockId]) {
       roomUsers[codeBlockId] = { mentor: null, students: 0 };
     }
@@ -124,47 +120,45 @@ io.on('connection', (socket) => {
       }
     });
 
-    
     // Handle disconnection
-socket.on('disconnect', async () => {
-    console.log(`User ${socket.id} disconnected from room ${currentRoom}`);
-  
-    if (currentRoom) {
-      const room = io.sockets.adapter.rooms.get(currentRoom);
-  
-      if (roomUsers[currentRoom]) {
-        if (roomUsers[currentRoom].mentor === socket.id) {
-          console.log(`Mentor ${socket.id} left. Resetting code block and notifying students.`);
-  
-          try {
-            // Fetch the code block from the database
-            const codeBlock = await CodeBlock.findById(currentRoom);
-            if (codeBlock) {
-              // Reset the code block to its original state
-              await CodeBlock.findByIdAndUpdate(currentRoom, { code: codeBlock.original });
-              io.to(currentRoom).emit('mentorLeft', codeBlock.original);
-            } else {
-              console.error('Code block not found for room:', currentRoom);
+    socket.on('disconnect', async () => {
+      console.log(`User ${socket.id} disconnected from room ${currentRoom}`);
+    
+      if (currentRoom) {
+        const room = io.sockets.adapter.rooms.get(currentRoom);
+    
+        if (roomUsers[currentRoom]) {
+          if (roomUsers[currentRoom].mentor === socket.id) {
+            console.log(`Mentor ${socket.id} left. Resetting code block and notifying students.`);
+    
+            try {
+              // Fetch the code block from the database
+              const codeBlock = await CodeBlock.findById(currentRoom);
+              if (codeBlock) {
+                // Reset the code block to its original state
+                await CodeBlock.findByIdAndUpdate(currentRoom, { code: codeBlock.original });
+                io.to(currentRoom).emit('mentorLeft', codeBlock.original);
+              } else {
+                console.error('Code block not found for room:', currentRoom);
+              }
+            } catch (error) {
+              console.error('Error resetting code block:', error);
             }
-          } catch (error) {
-            console.error('Error resetting code block:', error);
+    
+            // Clear the mentor role
+            roomUsers[currentRoom].mentor = null;
+          } else {
+            roomUsers[currentRoom].students -= 1;
+            io.to(currentRoom).emit('studentCount', roomUsers[currentRoom].students);
           }
-  
-          // Clear the mentor role
-          roomUsers[currentRoom].mentor = null;
-        } else {
-          roomUsers[currentRoom].students -= 1;
-          io.to(currentRoom).emit('studentCount', roomUsers[currentRoom].students);
+        }
+    
+        if (!room || room.size === 0) {
+          console.log(`Room ${currentRoom} is now empty`);
+          delete roomUsers[currentRoom];
         }
       }
-  
-      if (!room || room.size === 0) {
-        console.log(`Room ${currentRoom} is now empty`);
-        delete roomUsers[currentRoom];
-      }
-    }
-  });
-  
+    });
   });
 
   socket.on('leaveRoom', () => {
@@ -183,7 +177,6 @@ app.get('/api/code-blocks', async (req, res) => {
   }
 });
 
-
 app.get('/api/code-blocks/:blockId', async (req, res) => {
   try {
     const { blockId } = req.params;
@@ -197,7 +190,6 @@ app.get('/api/code-blocks/:blockId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch code block' });
   }
 });
-
 
 const port = 3001;
 
