@@ -13,15 +13,14 @@ const server = http.createServer(app);
 // Create a Socket.io instance attached to the server
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:3000', // Allow requests from this origin
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Allow requests from this origin
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(cors({
-  origin: 'https://codeblocks-client.onrender.com',
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
 }));
-
 
 app.use(express.json());
 
