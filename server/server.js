@@ -19,8 +19,9 @@ const io = socketIo(server, {
 });
 
 app.use(cors({
-  origin: 'http://localhost:3000', 
+  origin: 'https://codeblocks-client.onrender.com',
 }));
+
 
 app.use(express.json());
 
